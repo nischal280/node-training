@@ -6,4 +6,5 @@ const blogSchema = new schema({  // Here the object userSchema is created,
     description : String,
 })
 
-const user = mongoose.model("User",blogSchema)  
+const consumer = mongoose.model("consumer",blogSchema)
+module.exports = consumer
