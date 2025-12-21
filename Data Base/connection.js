@@ -1,6 +1,7 @@
 const mongoose = require("mongoose") 
 async function dbConnect(){
-   await mongoose.connect("mongodb+srv://nischal280:nischal280@cluster0.c1okhbd.mongodb.net/?appName=Cluster0")
+   await mongoose.connect(process.env.connectionString)  // aba yo secure bhayo i.e aba kasaile hamro mangoosedb ma save bhako dataherna sakdaina
+   // yo lekhne tarike (process.env.(env ma j name le save xa tyo re yo bracket pani hudaina))
    console.log("DB connected succesfully !!!")
 }
 

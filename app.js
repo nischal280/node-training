@@ -4,7 +4,7 @@ const user = require("./models/userModel") // Importing data
 const consumer = require("./models/blogModel") // Importing data of blogModels from models file
 const app = express()
 const bcrypt = require("bcrypt")
-
+require("dotenv").config()  // this command is written in order to keep your some part of code private so that no one can read or see it
 
 dbConnect()
 
@@ -26,7 +26,7 @@ app.get("/about",function(req,res){
 
 app.get("/fetch",async function(req,res){
     // response ma user table ma vako user data sent garnu paryo
-    const data = await user.find()
+    const data = await user.find()   // THis is all read operation
     res.json({
         data, // same as data : data
     })
@@ -36,6 +36,51 @@ app.get("/fetch",async function(req,res){
 })
 
 
+app.get("/fetchUser/:id",async function(req,res){
+    const id = req.params.id
+    const data = await user.findById(id)
+    res.json({
+       data,
+    })
+})
+app.get("/fetchBlog/:id",async function(req,res){
+    const id = req.params.id
+    const data = await consumer.findById(id)
+    res.json({
+        data,
+    })
+})
+
+app.get("/fixed/:id",async function(req,res){
+    const id = req.params.id
+    const data = await user.findById(id).select("-password")
+    res.json({
+       data,
+    })
+})
+
+app.get("/fixedInfo/:id",async function(req,res){ // yo ramrari check garnu yo wrong xa sayad
+    // const id = req.params.id
+    const data = await user.findById(id).select(["-password","__v"])
+    res.json({
+       data : data,
+    })
+})
+
+app.patch("/updateUser/:id",async function(req,res){
+    const id = req.params.id
+    const name = req.body.name
+    const email = req.body.email
+    const password = req.body.password
+    await user.findByIdAndUpdate(id,{
+        name : name,
+        email : email,
+        passsword : password,
+    })
+    res.json({
+        messsage : " Updated successfully"
+    })
+})
 
 app.post("/register",async function(req,res){
     const name = req.body.name
@@ -67,6 +112,23 @@ app.post("/show",async function(req,res){
         message : "blog created successfully"
     })
 })
+
+app.patch("/updateBlog/:id",async function(req,res){  // updating blog data
+    const id = req.params.id
+    const title = req.body.title
+    const subtitle = req.body.subtitle
+    const description = req.body.description
+    await consumer.findByIdAndUpdate(id,{
+        title:title,
+        subtitle : subtitle,
+        description :description,
+    })
+    res.json({
+        messsage : " Updated successfully"
+    })
+})
+
+
 app.delete("/del/:id",async function(req,res){
   const id =req.params.id
   console.log(id)
@@ -93,3 +155,30 @@ app.listen(3000,function(){
     */
 })
 // mongodb+srv://nischal280:<db_password>@cluster0.c1okhbd.mongodb.net/?appName=Cluster0
+
+app.post("/login", async function(req,res){
+    const email=req.body.email
+    const password = req.body.password
+    const data = await user.findOne({email : email})
+    if(!data){
+        res.json({
+             message : "Not registered"
+        })
+       
+    }else{
+        console.log(data.password)
+        const isMatched = bcrypt.compareSync(password,data.password) // phaila j passwoard enter garxau tyo enter garne tyaspxai mathi bata compare garne password ho
+          // yaha data.password gariyeko xa kina bhane mathi const data ma user.find garda kheri tyaha purai object nae awxa tyo particular id ko 
+        // yesle jaile pani boolean ma answer dinxa
+        //
+        if(isMatched){
+            res.json({
+                message : "Logged in successsfully"
+            })
+        }else{
+            res.json({
+                message : "Invalid password"
+            })
+        }
+    }
+})
